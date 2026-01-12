@@ -1,0 +1,9 @@
+npx create-vite@latest frontend
+react
+js
+n
+n
+cd frontend
+npm install
+npm socket.io-client date-fns classnames
+npm run dev
