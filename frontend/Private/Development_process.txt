@@ -7,3 +7,5 @@ cd frontend
 npm install
 npm socket.io-client date-fns classnames
 npm run dev
+
+npm install lucide-react // icon 서고

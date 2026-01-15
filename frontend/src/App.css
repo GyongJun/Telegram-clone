@@ -1,42 +1,295 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  color: white;
+}
+
+.chatSplitView {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  height: 100vh;
+  width: 100vw;
+}
+
+
+/* Sidebar stylesheet */
+
+.conversationsSidebar {
+  display: grid;
+  grid-template-rows: 60px 1fr;
+  width: 100%;
+  max-width: 280px;
+  background-color: rgb(34, 49, 63);
+}
+
+  /* Sidebar Hearder(SearchChatInput, Menu)   */
+
+.searchChatInput {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  gap: 0.5rem;
+}
+
+.iconContainer {
+  flex: 0 0 auto;
+  padding: 0.4rem;
+  transition: all 0.3s;
+  display: grid;
+  align-items: center;
+}
+
+.iconContainer:hover {
+  background-color: rgb(255, 255, 255, 0.2);
+  border-radius: 0.2rem;
+}
+
+.menuIcon {
+  opacity: 0.5;
+}
+
+.searchInputContainer {
+  flex: 1;
+  padding: auto;
+  padding-left: 0;
+}
+
+.searchInput {
+  padding: 0.5rem;
+  color: rgb(255, 255, 255, 0.5);
+  background-color: rgb(31, 45, 58);
+  border: none;
+  outline: none;
+  border-radius: 2px;
+}
+
+  /* ConversationsList */
+
+.conversationsList {
+  width: 100%;
+}
+
+.conversationItem {
+  height: 60px;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s;
+  max-width: 280px;
+  gap: 0.5rem;
+}
+
+.conversationItem:hover {
+  background-color: rgb(47, 162, 159);
+}
+
+  /*profile Icon StyleSheet*/
+
+.profileIconContainer {
+  flex: 0 0 auto;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1.5rem;
+  display: flex;
+  align-items: center;
+  background-color: tomato;
+}
+
+.profileNickname {
+  text-align: center;
+  font-size: 1.2rem;
+  width: 100%;
+}
+
+  /*profileMainContainer*/
+
+.profileMainContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  height: 3rem;
+  width: 100%;
+  font-size: 0.8rem;
+  padding: 0.2rem 0.1rem;
+  justify-content: space-between;
+}
+
+.nameAndMessageContainer {
+  flex: 0 0 170px;
+  max-width: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: white;
+}
+
+.profileName {
+  font-weight: 100;
+}
+
+.lastMessage {
+  color: rgb(255, 255, 255, 0.5);
+  font-weight: 100;
+  text-align: left;
+
+  /*메세지 요약처리*/
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+
+/* .profileIcon {
+
+} */
+
+.timeAndStateContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  justify-content: right;
+}
+
+.lastChattingTime {
+  flex: 1;
+  color: rgb(255, 255, 255, 0.5);
+  font-weight: 100;
+  text-align: right;
+}
+
+.messageStateContainer {
+  flex: 1;
+  align-self: flex-end;
+  background-color: rgb(47, 162, 159);
+  border-radius: 0.6rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.messageState {
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* ChatMainPanel StyleSheet : chatHeader, chatMainWindow, chatMessageInput*/
+
+
+.chatMainPanel {
+  display: grid;
+  grid-template-rows: 60px 1fr 50px;
+  width: 100%;
+  border-left: 1px solid rgb(47, 162, 159);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  /* ChatHeader StyleSheet */
+
+.chatHeader {
+  display: grid;
+  grid-template-columns: auto auto;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  background-color: rgb(34, 49, 63);
+  padding: 0.5rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.currentContact {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
 }
 
-.card {
-  padding: 2em;
+.contactNameContainer {
+  flex: 1;
+  color: white;
 }
 
-.read-the-docs {
-  color: #888;
+.onlineStateContainer {
+  flex: 1;
+  font-weight: 100;
+  color: rgb(47, 162, 159)
+}
+
+.iconsContainer {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.searchIcon {
+  opacity: 0.5;
+  size: 20;
+}
+
+.moreVerticalIcon {
+  opacity: 0.5;
+  size: 20;
+}
+
+  /* ChatMainWindow StyleSheet */
+
+.chatMainWindow {
+  background-image: linear-gradient(to top right, rgb(30, 19, 36), rgb(47, 162, 159));
+}
+ /* 기본 통보문 칸 stylesheet */
+.messagesContainer {
+  width: 100%;
+  height: 100%;
+  border: 1px solid red;
+  display: flex;
+  gap: 2rem;
+}
+
+.message-item {
+  
+}
+
+.message-main {
+
+}
+
+.message-time {
+
+}
+ 
+  /* 통보문입력칸 stylesheet */
+
+.chatMessageInput {
+  background-color: rgb(34, 49, 63);
+  display: flex;
+  align-items: center;
+}
+
+.paperClipIcon {
+  opacity: 0.5;
+  size: 20;
+}
+
+.messageInputContainer {
+  flex: 1;
+}
+
+.messageInput {
+  padding: 0.5rem;
+  border: none;
+  outline: none;
+  width: 100%;
+  border-radius: 0.2rem;
+  background-color: rgb(34, 49, 63);
+  color: rgb(255, 255, 255, 0.5);
+}
+
+.smileIcon {
+  opacity: 0.5;
+  size: 20;
+}
+
+.micIcon {
+  opacity: 0.5;
+  size: 20;
 }

@@ -1,0 +1,19 @@
+// 채팅 관련
+MessageCircle,   // 채팅
+Send,            // 전송
+Paperclip,       // 첨부
+Smile,           // 이모지
+Mic,             // 음성 메시지
+
+// 탐색/메뉴
+Search,          // 검색
+Menu,            // 햄버거 메뉴
+Settings,        // 설정
+Bell,            // 알림
+User,            // 프로필
+
+// 상태 표시
+Check,           // ✓ (전송됨)
+CheckCheck,      // ✓✓ (읽음)
+Clock,           // 전송 중
+More Vertical / Ellipsis Vertical    // ⋮ (점 3개)
