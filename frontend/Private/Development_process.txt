@@ -9,3 +9,10 @@ npm socket.io-client date-fns classnames
 npm run dev
 
 npm install lucide-react // icon 서고
+
+
+# 원격 브랜치 정보를 로컬로 가져오기
+git fetch origin
+
+# 원격 브랜치에서 로컬 브랜치 생성
+git checkout -b 브랜치이름 origin/브랜치이름
