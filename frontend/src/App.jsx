@@ -13,38 +13,64 @@ import {useState} from 'react'
 import './App.css'
 
 const mockContacts = {
- 'conv_1': {id: 'conv_1', name: "Hong Gyong Jun", nickname: "H", state: 'online', iconColor: 'tomato' , lastMessage: 'Hey, guys. Let us play football!!!', lastMessageTime: '11:34', unreadCount: 2},
- 'conv_2': {id: 'conv_2', name: 'Ri Won Hyok', nickname: "R", state: 'offline', iconColor: 'blue', lastMessage: 'No I have to study.',  lastMessageTime: '10:34', unreadCount: 7},
- 'conv_3': {id: 'conv_3', name: 'Shaine Fian', nickname: "S", state: 'online', iconColor: 'green', lastMessage: 'Yes', lastMessageTime: '09:20', unreadCount: 5}
+  'conv_1': {id: 'conv_1', name: "Hong Gyong Jun", nickname: "H", state: 'online', iconColor: 'tomato' , lastMessage: 'Hey, guys. Let us play football!!!', lastMessageTime: '11:34', unreadCount: 2},
+  'conv_2': {id: 'conv_2', name: 'Ri Won Hyok', nickname: "R", state: 'offline', iconColor: 'blue', lastMessage: 'No I have to study.',  lastMessageTime: '10:34', unreadCount: 7},
+  'conv_3': {id: 'conv_3', name: 'Shaine Fian', nickname: "S", state: 'online', iconColor: 'green', lastMessage: 'Yes', lastMessageTime: '09:20', unreadCount: 5}
 };
 
-const messages = {
+const mockMessages = {
+  'conv_1' : [
+    {id: '1', text: 'Hello', time: '11:30', isMine: false},
+    {id: '2', text: 'Hello, How a Hello, How are you Hello, How are you Hello, How are you Hello, How are you Hello, How are you Hello, How are you', time: '11:31', isMine: true},
+    {id: '3', text: 'I am fine. Do you have a minute?' , time:'11:32', isMine: false}
+  ],
+
+  'conv_2' : [
+    {id: '4', text: 'Hi', time: '06:21', isMine: false},
+    {id: '5', text: '1', time: '06:22', isMine: true}
+  ],
+
+  'conv_3' : [
+    {id: '6', text: '2', time: '15:01', isMine: false},
+    {id: '7', text: '3', time: '15:02', isMine: false}
+  ]
 }
+
+let tempContactsList = [];
+let tempMessagesList = [];
+
+let lastMessage = ""
+let lastMessageStyle = ""
+let lastMessageTime=""
 
 //ConversationsSidebar (Left Part)
 
-function SearchInputContainer() {
+function SearchChatInput ({filterText, onSetFilterTextChange}) {
   return(
     <>
-      <div className='searchInputContainer'>
-        <input className='searchInput' placeholder='Search' />
+      <div className='searchChatInput'>
+        <div className='iconContainer'>
+          <Menu size={20} className='menuIcon' />
+        </div>
+
+        <div className='searchInputContainer'>
+          <input className='searchInput' placeholder='Search' onChange={(e) => onSetFilterTextChange(e.target.value)}  />
+        </div>
       </div>
     </>
   );
 }
 
-function SearchChatInput () {
-  return(
-    <div className='searchChatInput'>
-      <div className='iconContainer'>
-        <Menu size={20} className='menuIcon' />
-      </div>
-      <SearchInputContainer />
-    </div>
-  );
-}
-
-function ProfileIconContainer({contact}) {
+function ProfileMainContainer({contact, messages}) {
+  let lastMessageTime = "";
+  let lastMessage = "";
+  let lastMessageStyle = "";
+  if(messages[contact.id]) {
+    let messagesLength = messages[contact.id].length;
+    lastMessage = messages[contact.id][messagesLength - 1].text;
+    lastMessageStyle =  (messages[contact.id][messagesLength - 1].isMine ? 'sent' : 'received');
+    lastMessageTime = (messages[contact.id][messagesLength - 1].time);
+  }
   return(
     <>
       <div className='profileIconContainer'>
@@ -52,26 +78,20 @@ function ProfileIconContainer({contact}) {
           {contact.nickname}
         </div>
       </div>
-    </>
-  )
-}
 
-function ProfileMainContainer({contact}) {
-  return(
-    <>
       <div className='profileMainContainer'>
           <div className='nameAndMessageContainer'>
             <div className='profileName'>
               {contact.name}
             </div>
-            <div className='lastMessage'>
-              {contact.lastMessage}
+            <div className= {`lastMessage ${lastMessageStyle}`}>
+              {lastMessage}
             </div>
           </div>
 
           <div className='timeAndStateContainer'>
             <div className='lastChattingTime'>
-              {contact.lastMessageTime}
+              {lastMessageTime}
             </div>
             <div className='messageStateContainer'>
               <div className='messageState'>
@@ -81,72 +101,161 @@ function ProfileMainContainer({contact}) {
           </div>
       </div>
     </>
-  )  
+  );
 }
 
-function ConversationItem({contact, onCurrentIdChange}) {
+function ConversationItem({contact, onCurrentIdChange, messages}) {
   return(
-    <>
+    <>  
       <li className='conversationItem' onClick={() => onCurrentIdChange(contact.id)}>
-        <ProfileIconContainer contact={contact} />
-        <ProfileMainContainer contact={contact} />
+        <ProfileMainContainer contact={contact} messages={messages} />
       </li>
     </>
   )
 }
 
-function ConversationsList({contactsList, onCurrentIdChange}) {
-  const tempContactsList = [];
-  Object.values(contactsList).forEach((contact) => {
-    tempContactsList.push(<ConversationItem contact={contact} key={contact.id} onCurrentIdChange={onCurrentIdChange} />);
-  });
+function ConversationsList({contactsList, onCurrentIdChange, messages, filterText}) {
 
   return(
     <>
       <div className='conversationsList'>
-        {tempContactsList}
+        {
+          Object.values(contactsList)
+            .filter(contact => contact.name.includes(filterText))
+            .map(contact => (
+              <ConversationItem key={contact.id} contact={contact} onCurrentIdChange={onCurrentIdChange} messages={messages} />
+            ))
+        }
       </div>
     </>
   );
 }
 
-function ConversationsSidebar ({contactsList, onCurrentIdChange}) {
+function ConversationsSidebar ({contactsList, onCurrentIdChange, messages}) {
+  const [filterText, setFilterText] = useState('');
+
   return(
     <div className='conversationsSidebar'>
-      <SearchChatInput />
-      <ConversationsList contactsList={contactsList} onCurrentIdChange={onCurrentIdChange} />
+      <SearchChatInput filterText={filterText} onSetFilterTextChange={setFilterText} />
+      <ConversationsList
+        contactsList={contactsList}
+        onCurrentIdChange={onCurrentIdChange}
+        messages={messages} 
+        filterText={filterText} />
     </div>
   );
 }
 
 // chatMainPanel (Right Part)
 
-function ChatMessageInput() {
+function ChatMessageInput({currentId, messages, onSetMessages}) {
+  const [messageText, setMessageText] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (messageText.trim() && currentId) {
+      // const nextMessages = {...messages};
+      // // console.log(currentId);
+      // nextMessages[currentId].push({id: '' + 100 * Math.random(), text: messageText, time:'11:44', isMine: true});
+      // onSetMessages(nextMessages);
+      const newMessage = {id: Date.now().toString(), text: messageText, time: new Date().toLocaleTimeString('ko-KR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      })};
+
+      const nextMessages = {...messages, [currentId] : [...messages[currentId], newMessage]};
+      onSetMessages(nextMessages);
+    }
+    setMessageText('');
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
   return(
-    <div className='chatMessageInput'>
-      <div className='iconContainer'>
-        <Paperclip className='paperClipIcon' />
-      </div>
-      <div className='messageInputContainer'>
-        <input className='messageInput' placeholder='Write a message...'></input>
-      </div>  
-      <div className='iconContainer'>
-        <Smile className='smileIcon' />
-      </div>
-      <div className='iconContainer'>
-        <Mic className='micIcon' />
-      </div>
-    </div>
+        <div className='chatMessageInput'>
+          <div className='iconContainer'>
+            <Paperclip className='paperClipIcon' />
+          </div>
+          <div className='messageInputContainer'>
+            <form onSubmit={handleSubmit}>
+              <input className='messageInput' placeholder='Write a message...' onChange={(e) => setMessageText(e.target.value)} onKeyDown={handleKeyDown} value={messageText}/>
+            </form>
+          </div>
+          <div className='iconContainer'>
+            <Smile className='smileIcon' />
+          </div>
+          <div className='iconContainer'>
+            <Mic className='micIcon' />
+          </div>
+        </div>
   );
 }
 
-function ChatMainWindow() {
+
+function MessagesContainer({currentId, messages}) {
+  tempMessagesList = [];
+  if (currentId) {
+    if (Object.keys(messages).includes(currentId)) {
+      messages[currentId].forEach((message) => {
+        if (message.isMine) {
+          tempMessagesList.push(
+            <li className='message-item sent' key={message.id}>
+              <div className='message-content'>
+                {message.text}
+              <span className='message-info'>
+                {message.time}
+              </span>
+
+              </div>
+            </li>
+          );
+        }
+        else {
+          tempMessagesList.push(
+            <li className='message-item received' key={message.id}>
+              <div className='message-content'>
+                {message.text}
+                <span className='message-info'>
+                  {message.time}
+                </span>
+              </div>
+            </li>
+          );
+        }
+      });
+    }
+  }
+
+  if (!messages[currentId] && !currentId)
+    return <div className='messagesContainer'></div>
+
+  return(
+    <div className='messagesContainer'>
+      {
+        messages[currentId].map(message => (
+          <li className= {`message-item ${message.isMine ? 'sent' : 'received'}`} key={message.id}>
+            <div className='message-content'>
+              {message.text}
+              <span className='message-info'>{message.time}</span>
+            </div>
+          </li>
+        ))
+      }
+    </div>
+  )
+}
+
+function ChatMainWindow({currentId, messages}) {
   return(
     <>
       <div className='chatMainWindow'>
-        <div className='messagesContainer'>
-          
-        </div>
+        <MessagesContainer currentId={currentId} messages={messages} />
       </div>
     </>
   );
@@ -157,15 +266,15 @@ function CurrentContact ({currentId}) {
     <>
       <div className='currentContact'>
         <div className='contactNameContainer'>
-          {mockContacts[currentId].name}
+          {currentId? mockContacts[currentId].name : ""}
         </div>
 
         <div className='onlineStateContainer'>
-          {mockContacts[currentId].state}
+          {currentId? mockContacts[currentId].state : ""}
         </div>
       </div>
     </>
-  )
+  );
 }
 
 function ChatHeader({currentId}) {
@@ -187,13 +296,13 @@ function ChatHeader({currentId}) {
   );
 }
 
-function ChatMainPanel({currentId}) {
+function ChatMainPanel({currentId, messages, onSetMessages}) {
   return(
     <>
       <div className='chatMainPanel'>
         <ChatHeader currentId={currentId} />
-        <ChatMainWindow />
-        <ChatMessageInput />
+        <ChatMainWindow currentId={currentId} messages={messages}/>
+        <ChatMessageInput currentId={currentId} messages={messages} onSetMessages={onSetMessages} />
         <div></div>
       </div>
     </>
@@ -202,11 +311,12 @@ function ChatMainPanel({currentId}) {
 
 function ChatSplitView() {
   const [contactsList, setContactList] = useState(mockContacts);
-  const [currentId, setCurrentId] = useState(Object.keys(mockContacts)[0]);
+  const [currentId, setCurrentId] = useState(Object.keys(mockContacts).length > 0 ? Object.keys(mockContacts)[0] : null);
+  const [messages, setMessages] = useState(mockMessages);
   return(
     <div className='chatSplitView'>
-      <ConversationsSidebar contactsList={contactsList} onCurrentIdChange={setCurrentId}/>
-      <ChatMainPanel currentId={currentId} />
+      <ConversationsSidebar contactsList={contactsList} onCurrentIdChange={setCurrentId} messages={messages} />
+      <ChatMainPanel currentId={currentId} messages={messages} onSetMessages={setMessages}/>
     </div>
   );
 }

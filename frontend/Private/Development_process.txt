@@ -16,3 +16,29 @@ git fetch origin
 
 # 원격 브랜치에서 로컬 브랜치 생성
 git checkout -b 브랜치이름 origin/브랜치이름
+
+
+new Date().toISOString()
+
+
+.auto-wrap {
+  word-wrap: break-word;    /* 구형 브라우저 */
+  overflow-wrap: break-word; /* 현대적 표준 */
+} // 줄바꿈 
+
+overflow-wrap: break-word + word-break: keep-all
+
+
+
+완전히 중요한 문제들!!!
+절대 대역변수로 처리하는 현상없애야 함. 대역변수는 모든 콤퍼넌트가 공유하므로 이값이 변할시 모두 재런더링이 발생한다.
+
+
+📝 간단한 규칙:
+JSX는 return문 안이나 근처에서 작성하라
+
+컴포넌트 생성은 map()으로 하라
+
+로직과 렌더링을 가까이 두라
+
+key는 안정적이고 고유한 값을 사용하라
