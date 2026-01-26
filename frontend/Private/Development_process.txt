@@ -42,3 +42,19 @@ JSX는 return문 안이나 근처에서 작성하라
 로직과 렌더링을 가까이 두라
 
 key는 안정적이고 고유한 값을 사용하라
+
+ // 계정 창조 단추 효과
+.create-account-btn {
+  background: #0088cc;  /* 텔레그램 블루 */
+  color: white;
+  transition: background 0.2s ease;
+}
+
+.create-account-btn:hover {
+  background: #0077b3;
+}
+
+.create-account-btn:active {
+  background: #006699;
+  transform: scale(0.98);
+}

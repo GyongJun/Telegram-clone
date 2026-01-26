@@ -9,43 +9,32 @@ import {
   MoreVerticalIcon,
 } from 'lucide-react'
 
-import {useState} from 'react'
+import {useState, useEffect, useRef} from 'react'
 import './App.css'
+import {io} from 'socket.io-client'
 
-const mockContacts = {
-  'conv_1': {id: 'conv_1', name: "Hong Gyong Jun", nickname: "H", state: 'online', iconColor: 'tomato' , lastMessage: 'Hey, guys. Let us play football!!!', lastMessageTime: '11:34', unreadCount: 2},
-  'conv_2': {id: 'conv_2', name: 'Ri Won Hyok', nickname: "R", state: 'offline', iconColor: 'blue', lastMessage: 'No I have to study.',  lastMessageTime: '10:34', unreadCount: 7},
-  'conv_3': {id: 'conv_3', name: 'Shaine Fian', nickname: "S", state: 'online', iconColor: 'green', lastMessage: 'Yes', lastMessageTime: '09:20', unreadCount: 5}
-};
 
-const mockMessages = {
-  'conv_1' : [
-    {id: '1', text: 'Hello', time: '11:30', isMine: false},
-    {id: '2', text: 'Hello, How a Hello, How are you Hello, How are you Hello, How are you Hello, How are you Hello, How are you Hello, How are you', time: '11:31', isMine: true},
-    {id: '3', text: 'I am fine. Do you have a minute?' , time:'11:32', isMine: false}
-  ],
-
-  'conv_2' : [
-    {id: '4', text: 'Hi', time: '06:21', isMine: false},
-    {id: '5', text: '1', time: '06:22', isMine: true}
-  ],
-
-  'conv_3' : [
-    {id: '6', text: '2', time: '15:01', isMine: false},
-    {id: '7', text: '3', time: '15:02', isMine: false}
-  ]
-}
-
-let tempContactsList = [];
-let tempMessagesList = [];
-
-let lastMessage = ""
-let lastMessageStyle = ""
-let lastMessageTime=""
+const myContactId = 'user_123';
 
 //ConversationsSidebar (Left Part)
 
 function SearchChatInput ({filterText, onSetFilterTextChange}) {
+  const [filterText, setFilterText] = useState('');
+  const filterTextRef = useRef('');
+
+  useEffect(() => {
+    filterTextRef.current = filterText;
+    if (!filterText.current) {
+      setResult([]);
+      return;
+    }
+
+    const timer = setInterval(() => {
+      const currentText 
+      fetch(`api/search?q=${filterText}`)
+    }, 150);
+  }, [filterText]);
+
   return(
     <>
       <div className='searchChatInput'>
@@ -54,7 +43,7 @@ function SearchChatInput ({filterText, onSetFilterTextChange}) {
         </div>
 
         <div className='searchInputContainer'>
-          <input className='searchInput' placeholder='Search' onChange={(e) => onSetFilterTextChange(e.target.value)}  />
+          <input className='searchInput' placeholder='Search' onChange={(e) => setFilterText(e.target.value)} value={filterText} />
         </div>
       </div>
     </>
@@ -120,11 +109,11 @@ function ConversationsList({contactsList, onCurrentIdChange, messages, filterTex
     <>
       <div className='conversationsList'>
         {
-          Object.values(contactsList)
+          contactsList? (Object.values(contactsList)
             .filter(contact => contact.name.includes(filterText))
             .map(contact => (
               <ConversationItem key={contact.id} contact={contact} onCurrentIdChange={onCurrentIdChange} messages={messages} />
-            ))
+            ))) : ('')
         }
       </div>
     </>
@@ -132,11 +121,10 @@ function ConversationsList({contactsList, onCurrentIdChange, messages, filterTex
 }
 
 function ConversationsSidebar ({contactsList, onCurrentIdChange, messages}) {
-  const [filterText, setFilterText] = useState('');
 
   return(
     <div className='conversationsSidebar'>
-      <SearchChatInput filterText={filterText} onSetFilterTextChange={setFilterText} />
+      <SearchChatInput />
       <ConversationsList
         contactsList={contactsList}
         onCurrentIdChange={onCurrentIdChange}
@@ -148,24 +136,13 @@ function ConversationsSidebar ({contactsList, onCurrentIdChange, messages}) {
 
 // chatMainPanel (Right Part)
 
-function ChatMessageInput({currentId, messages, onSetMessages}) {
+function ChatMessageInput({currentId, messages, onSetMessages, onSendMessage}) {
   const [messageText, setMessageText] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (messageText.trim() && currentId) {
-      // const nextMessages = {...messages};
-      // // console.log(currentId);
-      // nextMessages[currentId].push({id: '' + 100 * Math.random(), text: messageText, time:'11:44', isMine: true});
-      // onSetMessages(nextMessages);
-      const newMessage = {id: Date.now().toString(), text: messageText, time: new Date().toLocaleTimeString('ko-KR', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      })};
-
-      const nextMessages = {...messages, [currentId] : [...messages[currentId], newMessage]};
-      onSetMessages(nextMessages);
+    if (messageText.trim() && currentId) { 
+      onSendMessage(myContactId ,currentId, messageText.trim());
     }
     setMessageText('');
   };
@@ -184,7 +161,9 @@ function ChatMessageInput({currentId, messages, onSetMessages}) {
           </div>
           <div className='messageInputContainer'>
             <form onSubmit={handleSubmit}>
-              <input className='messageInput' placeholder='Write a message...' onChange={(e) => setMessageText(e.target.value)} onKeyDown={handleKeyDown} value={messageText}/>
+              <input className='messageInput' placeholder='Write a message...'
+                onChange={(e) => setMessageText(e.target.value)} onKeyDown={handleKeyDown}
+                value={messageText}/>
             </form>
           </div>
           <div className='iconContainer'>
@@ -199,40 +178,8 @@ function ChatMessageInput({currentId, messages, onSetMessages}) {
 
 
 function MessagesContainer({currentId, messages}) {
-  tempMessagesList = [];
-  if (currentId) {
-    if (Object.keys(messages).includes(currentId)) {
-      messages[currentId].forEach((message) => {
-        if (message.isMine) {
-          tempMessagesList.push(
-            <li className='message-item sent' key={message.id}>
-              <div className='message-content'>
-                {message.text}
-              <span className='message-info'>
-                {message.time}
-              </span>
 
-              </div>
-            </li>
-          );
-        }
-        else {
-          tempMessagesList.push(
-            <li className='message-item received' key={message.id}>
-              <div className='message-content'>
-                {message.text}
-                <span className='message-info'>
-                  {message.time}
-                </span>
-              </div>
-            </li>
-          );
-        }
-      });
-    }
-  }
-
-  if (!messages[currentId] && !currentId)
+  if (!messages || !messages[currentId] || !currentId)
     return <div className='messagesContainer'></div>
 
   return(
@@ -248,10 +195,10 @@ function MessagesContainer({currentId, messages}) {
         ))
       }
     </div>
-  )
+  );
 }
 
-function ChatMainWindow({currentId, messages}) {
+function ChatMainWindow({currentId, messages}) {  
   return(
     <>
       <div className='chatMainWindow'>
@@ -261,16 +208,16 @@ function ChatMainWindow({currentId, messages}) {
   );
 }
 
+
+// 반드시 수정!!!
 function CurrentContact ({currentId}) {
   return(
     <>
       <div className='currentContact'>
         <div className='contactNameContainer'>
-          {currentId? mockContacts[currentId].name : ""}
         </div>
 
         <div className='onlineStateContainer'>
-          {currentId? mockContacts[currentId].state : ""}
         </div>
       </div>
     </>
@@ -278,17 +225,42 @@ function CurrentContact ({currentId}) {
 }
 
 function ChatHeader({currentId}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  
+  const handleAddContact = () => {
+    const contactName = prompt('새 련락처 이름을 입력하시오');
+    if (contactName) {
+      console.log(contactName);
+    }
+    setMenuOpen(false);
+  }
+
   return(
     <>
       <div className='chatHeader'>
         <CurrentContact currentId={currentId} />
         <div className='iconsContainer'>
+
           <div className='iconContainer'>
             <Search className='searchIcon' />
           </div>
 
           <div className='iconContainer'>
-            <MoreVerticalIcon className='moreVerticalIcon' />
+            <MoreVerticalIcon className='moreVerticalIcon' onClick={() => setMenuOpen(!menuOpen)} />
+            {menuOpen && (
+              <div className='verticalMenu'>
+                <div className='menuItem' onClick={handleAddContact} >
+                  새 주소 추가
+                </div>
+                <div className='menuItem'>
+                  대화자 정보 보기
+                </div>
+                <div className='menuItem'>
+                  설정
+                </div>
+              </div>
+              
+            )}
           </div>
         </div>
       </div>
@@ -296,35 +268,180 @@ function ChatHeader({currentId}) {
   );
 }
 
-function ChatMainPanel({currentId, messages, onSetMessages}) {
+function ChatMainPanel({currentId, messages, onSetMessages, onSendMessage}) {
+  const [searchBoxShow, setSearchBoxShow] = useState(false);
+  const [verticalBoxShow, setVerticalBoxShow] = useState(false);
+
   return(
     <>
       <div className='chatMainPanel'>
         <ChatHeader currentId={currentId} />
-        <ChatMainWindow currentId={currentId} messages={messages}/>
-        <ChatMessageInput currentId={currentId} messages={messages} onSetMessages={onSetMessages} />
+        <ChatMainWindow currentId={currentId} messages={messages} />
+        <ChatMessageInput currentId={currentId} messages={messages} onSetMessages={onSetMessages} onSendMessage={onSendMessage} />
         <div></div>
       </div>
     </>
   );
 }
 
-function ChatSplitView() {
-  const [contactsList, setContactList] = useState(mockContacts);
-  const [currentId, setCurrentId] = useState(Object.keys(mockContacts).length > 0 ? Object.keys(mockContacts)[0] : null);
-  const [messages, setMessages] = useState(mockMessages);
-  return(
-    <div className='chatSplitView'>
-      <ConversationsSidebar contactsList={contactsList} onCurrentIdChange={setCurrentId} messages={messages} />
-      <ChatMainPanel currentId={currentId} messages={messages} onSetMessages={setMessages}/>
-    </div>
+function LoginForm ({onSignIn}) {
+  const [isLogin, setIsLogin] = useState(true);
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+
+  const handleSignUp = async () => {
+    const response = await fetch('http://localhost:3000/api/register', {
+      method: 'POST',
+      headers: { 'Content-type' : 'application/json' },
+      body: JSON.stringify({name, email, password})
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userId', data.userId);
+    }
+    else {
+      console.log(data.error);
+    }
+  };
+  
+  const handleSignIn = async () => {
+    const response = await fetch('http://localhost:3000/api/login', {
+      method: 'POST',
+      headers: { 'Content-type': 'application/json' },
+      body: JSON.stringify({email, password})
+    });
+
+    const data = await response.json();
+    console.log(data);
+    if (data.success) {
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userId', data.userId);
+      onSignIn(true);
+    }
+    else {
+      console.log(data.error);
+    }
+  };
+ 
+  return (
+    <>
+      <form className='login-form-container'>
+        <label>{isLogin ? 'Sign In' : 'Sign Up'}</label>
+        {!isLogin && (<input type='text' className='login-input' placeholder='Write here your username' value={name} onChange={(e) => setName(e.target.value)}></input>) }
+        <input type='text' className='login-input' placeholder='user@domain.region' value={email} onChange={(e) => setEmail(e.target.value)}></input>
+        <input type='password' className='login-input' placeholder="Write here your password" value={password} onChange={(e) => setPassword(e.target.value)}></input>
+        <input type='submit' className='login-input continue-button' value={'CONTINUE'} onClick={(e) => {e.preventDefault(); isLogin? handleSignIn() : handleSignUp();}}></input>
+        {isLogin ? 
+          (<input type='button' className='login-input create-account-btn' value="CREATE AN ACCOUNT" onClick={() => {
+            setIsLogin(!isLogin);
+            setPassword('');
+            setEmail('');
+          }}></input>) :
+          (<input type="button" className='login-input create-account-btn' value={'BACK'} onClick={() => {
+            setIsLogin(!isLogin);
+            setPassword('');
+            setEmail('');
+            setName('');
+          }}></input>)
+        }
+      </form>
+    </>
   );
 }
 
-export default function ChatLayout() {
-  return (
+export default function App () {
+  const [contactsList, setContactList] = useState(null);
+  const [currentId, setCurrentId] = useState(null);
+  const [messages, setMessages] = useState(null);
+  const [socket, setSocket] = useState(null);
+  const [isSignIn, setIsSignIn] = useState(false);
+
+  const socketRef = useRef(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      setIsSignIn(false);
+      return;
+    }
+
+    setIsSignIn(true);
+    if (!socket) {
+      const newSocket = io('http://localhost:3000', {
+        auth : {token}
+      });
+
+      socketRef.current = newSocket;
+      setSocket(newSocket);
+    }
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnet();
+        socketRef.current = null;
+        setSocket(null);
+      }
+    };
+  }, []);
+
+  useEffect(() => { 
+    const token = localStorage.getItem('token');
+
+    if (isSignIn && token && !socketRef.current) {
+      const newSocket = io('http://localhost:3000', {
+        auth : {token}
+      });
+      socketRef.current = newSocket;
+      setSocket(newSocket);
+    }
+
+    if (!isSignIn && socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
+      setSocket(null);
+    }
+
+  }, [isSignIn]);
+
+  const handleSendMessage = (myContactId, contactId, messageText) => {
+    if (socket) {
+      socket.emit('sendMessage', {
+        senderId: myContactId,
+        receiverId: contactId,
+        text: messageText,
+        isMine: true
+      });
+    }
+
+    const newMessage = {
+      id: Date.now().toString(),
+      text: messageText,
+      time: new Date().toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit', hour12: false}),
+      isMine: true
+    };
+
+    setMessages(prev => ({
+      ...prev,
+      [contactId]: [...prev[contactId], newMessage]
+    }));
+  };
+
+  return(
     <>
-      <ChatSplitView />
+    {isSignIn? (
+      <div className='chatSplitView'>
+        <ConversationsSidebar contactsList={contactsList} onCurrentIdChange={setCurrentId} messages={messages} />
+        <ChatMainPanel currentId={currentId} messages={messages} onSetMessages={setMessages} onSendMessage={handleSendMessage}/>
+      </div>
+    ) : (
+      <div className='login-window'>
+        <LoginForm onSignIn={setIsSignIn} /> 
+      </div>
+    )}
     </>
   );
 }
